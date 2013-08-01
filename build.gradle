@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+eclipse.project.name = "CloudFrontUtil"
+
+dependencies {
+    compile ('commons-codec:commons-codec:1.6')
+    compile ('bouncycastle:bcprov-jdk16:140')
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile ('org.mockito:mockito-all:1.9.5')
+}
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+task dist(dependsOn:clean, type:Zip){
+    baseName = eclipse.project.name
+    into (baseName + '/libs') {
+        from jar.outputs.files
+        from configurations.compile
+    }
+}
+
+// custom tasks for creating source/javadoc jars
+task sourcesJar(type: Jar, dependsOn:classes) {
+     classifier = 'sources'
+     from sourceSets.main.allSource
+}
+ 
+task javadocJar(type: Jar, dependsOn:javadoc) {
+     classifier = 'javadoc'
+     from javadoc.destinationDir
+}
+ 
+// add javadoc/source jar tasks as artifacts
+artifacts {
+     archives sourcesJar
+     archives javadocJar
+}
